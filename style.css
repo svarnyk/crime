@@ -1,7 +1,8 @@
-*{
+* {
     box-sizing: border-box;
 }
-body{
+
+body {
     padding: 0;
     font-family: 'Montserrat', sans-serif;
     font-size: 16px;
@@ -11,22 +12,87 @@ body{
     margin: 0;
 
 }
-.crimeTopography{
+
+.crimeTopography {
     height: 100%;
 }
-.crimeTopography__wrapper{
+
+.crimeTopography__wrapper {
     padding: 56px 120px 76px;
 
 }
-.crimeTopography__header, .topic__value{
+
+.crimeTopography__header, .topic__value {
     font-size: 40px;
     font-weight: 700;
 }
-.crimeTopography__content{
-
+.crimeTopography__header{
+    padding-bottom: 40px;
 }
-.crimeTopography__statistic{
+
+.crimeTopography__content {
+    display: flex;
+    padding-bottom: 26px;
+}
+
+.crimeTopography__statistic {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    padding-bottom: 24px;
+    padding-top: 24px;
+}
+
+.crimeTopography__map {
+    height: 457px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.crimeTopography__equalizer{
+    height: 60px;
+    width: 100%;
+    display: flex;
+    gap: 2px;
+}
+.crimeTopography__column{
+    min-width: 2px;
+    background-color: #292929;
+    display: flex;
+    justify-content: center;
+}
+.crimeTopography__column:hover .crimeTopography__date{
+    visibility: visible;
+}
+.crimeTopography__equalizerBottomLine{
+    width: 100%;
+    background-color: #292929;
+    height: 2px;
+}
+
+.crimeTopography__date{
+    visibility: hidden;
+    background-color: #292929;
+    position: relative;
+    top: 80px;
+    height: fit-content;
+    width: fit-content;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.crimeTopography__triangle{
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-bottom: 4px solid #292929;
+    position: relative;
+    bottom: 4px;
+}
+.crimeTopography__dateText{
+    white-space: nowrap;
+    font-weight: 500;
+    padding: 4px 8px;
 }
