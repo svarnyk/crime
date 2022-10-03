@@ -2,9 +2,9 @@ import names from './data/names.json' assert {type: 'json'};
 import events from './data/events.json' assert {type: 'json'};
 
 const crimeBlock = document.querySelector('.crimeTopography');
-
 const sortEvents = events.sort((a, b) => a.from < b.from ? -1 : 1)
-const filterByDate = Object.values(sortEvents.reduce((newObj, document) => {
+
+const filterByDate100 = (arr) => Object.values(arr.reduce((newObj, document) => {
         let date = new Date(document.from)
         let options = {day: "numeric", month: "short", year: "numeric"}
         let rightDate = new Intl.DateTimeFormat("en-GB", options).format(date)
@@ -12,31 +12,42 @@ const filterByDate = Object.values(sortEvents.reduce((newObj, document) => {
             newObj[document.from] = newObj[document.from] ||
                 {
                     date: rightDate,
-                    cases: 0,
+                    date2: document.from,
+                    cases: (sumOfCase(arr, document.from))*100/190,
                 }
         return newObj
     }, {})
 ).slice(-100)
-const columns = (filterByDate.map((dates) => {
-    return `<div class="crimeTopography__column" style="height: 100%">
-            <div class="crimeTopography__date">
-                <div class="crimeTopography__triangle"></div>
-                <div class="crimeTopography__dateText">${dates.date}</div>
-            </div>
-        </div>`
-})).join("")
+
+const f = (arr, par, i) => arr.filter((date)=>date[par]===i)
+const f2 = (arr, par, i) => arr.filter((date)=>date.hasOwnProperty(par)===i)
+const f3 = (arr, par, i) => arr.filter((date)=>toNumber(date[par])===i)
+const toNumber =(i)=> Number(i)
+const ret = (arr, par) => arr.map((date)=> toNumber(date[par]) + null)
+const sum = (arr) => arr.reduce((acc, item)=>acc + item, 0)
+
+const sumOfCase = (arr, date) => {
+  return  sum(ret(f2(f(arr,"from",date),"affected_number", true),"affected_number"))
+}
+const sumOfCaseByCategory = (arr, date, i) =>{
+    return sum(ret(f3(f2(f(arr, "from", date),"affected_number", true), "affected_type", i),"affected_number"))
+}
+const sumOfCaseByCategoryAll = (arr, i) =>{
+    return sum(ret(f3(f2(arr,"affected_number", true), "affected_type", i),"affected_number"))
+}
+
 const asn = 44.386389;
 const ase = 33.777222;
 const awn = 48.430556;
 const awe = 22.163889;
-const sn = 460;
+const sn = 455;
 const se = 440;
-const wn = 248;
-const we = 45;
-
+const wn = 250;
+const we = 40;
 const lat = (i) =>  -((asn-(sn/((sn-wn)/(asn-awn))))-i)*((sn-wn)/(asn-awn))
 const lon = (i) => -((ase-(se/((se-we)/(ase-awe))))-i)*((se-we)/(ase-awe))
-const dots = Object.values(sortEvents.reduce((newObj, document) => {
+
+const dots =(arr)=> Object.values(arr.reduce((newObj, document) => {
         newObj[document.lat] = newObj[document.lat] ||
             {
                 lat: lat(document.lat),
@@ -45,14 +56,42 @@ const dots = Object.values(sortEvents.reduce((newObj, document) => {
         return newObj
     }, {})
 )
-const redDots = dots.map((redDots)=>{
+
+let workArray = [];
+let workObject = {
+    cat2: sumOfCaseByCategoryAll(sortEvents,2),
+    cat3: sumOfCaseByCategoryAll(sortEvents,3),
+    cat4: sumOfCaseByCategoryAll(sortEvents,4),
+    cat5: sumOfCaseByCategoryAll(sortEvents,5),
+    cat6: sumOfCaseByCategoryAll(sortEvents,6),
+};
+function getWorkArray(date) {
+    workArray = f(sortEvents, "from", date)
+    workObject.cat2 = sumOfCaseByCategory(sortEvents, date, 2)
+    workObject.cat3 = sumOfCaseByCategory(sortEvents, date, 3)
+    workObject.cat4 = sumOfCaseByCategory(sortEvents, date, 4)
+    workObject.cat5 = sumOfCaseByCategory(sortEvents, date, 5)
+    workObject.cat6 = sumOfCaseByCategory(sortEvents, date, 6)
+    getCrime(workArray, workObject)
+}
+window.getWorkArray = getWorkArray
+
+const redDots =(arr)=> dots(arr).map((redDots)=>{
     return `<circle cx="${redDots.lon}" cy="${redDots.lat}" r="1" stroke="none" fill="#C00000"/>`
 }).join("")
 
-getCrime()
+const columns = (filterByDate100(sortEvents).map((dates) => {
 
-function getCrime() {
+    return `<div onclick="window.getWorkArray('${dates.date2}')" class="crimeTopography__column" style="height: ${dates.cases}%">
+            <div class="crimeTopography__date" style="top: ${((dates.cases)*60/100)+20}px">
+                <div class="crimeTopography__triangle"></div>
+                <div class="crimeTopography__dateText">${dates.date}</div>
+            </div>
+        </div>`
+})).join("")
+getCrime(sortEvents, workObject)
 
+function getCrime(data, data2) {
 
     const body = `
       <div class="crimeTopography__wrapper">
@@ -60,24 +99,27 @@ function getCrime() {
         <div class="crimeTopography__content">
             <div class="crimeTopography__statistic">
                 <div class="topic">
-                    <div class="topic__value">1234</div>
-                    <div class="topic__heading">Killed Militarists</div>
+                    <div class="topic__value">${data2.cat2}</div>
+                    <div class="topic__heading">${names.en.affected_type["2"]}</div>
                 </div>
                 <div class="topic">
-                    <div class="topic__value">1234</div>
-                    <div class="topic__heading">Killed Militarists</div>
+                    <div class="topic__value">${data2.cat3}</div>
+                    <div class="topic__heading">${names.en.affected_type["3"]}</div>
                 </div>
                 <div class="topic">
-                    <div class="topic__value">1234</div>
-                    <div class="topic__heading">Killed Militarists</div>
+                    <div class="topic__value">${data2.cat4}</div>
+                    <div class="topic__heading">${names.en.affected_type["4"]}</div>
                 </div>
                 <div class="topic">
-                    <div class="topic__value">1234</div>
-                    <div class="topic__heading">Killed Militarists</div>
+                    <div class="topic__value">${data2.cat5}</div>
+                    <div class="topic__heading">${names.en.affected_type["5"]}</div>
+                </div>
+                <div class="topic">
+                    <div class="topic__value">${data2.cat6}</div>
+                    <div class="topic__heading">${names.en.affected_type["6"]}</div>
                 </div>
             </div>
             <div class="crimeTopography__map">
-<!--            <object data="./img/Map_of_Ukraine_political_simple_blank.svg" type="image/svg+xml" id="imap" ></object>-->
 <svg version="1.1" id="svg2" xmlns:svg="http://www.w3.org/2000/svg"
      xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="700px"
      height="480px"
@@ -1367,9 +1409,9 @@ function getCrime() {
 \t\tc0.344-0.343-0.478-1.011-0.563-1.126c-0.245-0.328-0.298-0.402-0.188-0.845"/>
 </g>
     <g id="dots">
-    ${redDots}
+    ${redDots(data)}
 \t</g>
-</svg>
+</svg>  
             </div>
         </div>
         <div class="crimeTopography__equalizerWrapper">
@@ -1381,9 +1423,4 @@ function getCrime() {
     </div>
 `;
     crimeBlock.innerHTML = body
-    // console.log(names)
-    console.log(events)
-    // console.log(sortEvents)
-    // console.log(filterByDate)
-    console.log(dots)
 }
